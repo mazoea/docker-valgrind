@@ -1,8 +1,6 @@
 name: ☃ build-and-publish
 on:
   push:
-    branches-ignore:
-      - '*'
     tags:
       - '*'
   workflow_dispatch:
@@ -36,6 +34,12 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker pull $TAG || true
           docker build . -f Dockerfile --tag $TAG --cache-from $TAG
+
+      - name: validate image
+        run: |
+          TAG=${{ env.IMG_REPO }}:${{ github.ref_name }}
+          echo "Validating image: $TAG"
+          docker run --rm $TAG --version
 
       - name: push image
         run: |
